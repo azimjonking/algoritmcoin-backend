@@ -13,7 +13,9 @@ from pydantic import (
     constr,
 )
 
-config = ConfigDict(from_attributes=True)
+from ..service.password import PasswordMixin
+
+config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
 
 
 class Teacher(BaseModel):
@@ -30,7 +32,7 @@ class Teacher(BaseModel):
     )
 
 
-class TeacherCreate(Teacher):
+class TeacherCreate(Teacher, PasswordMixin):
     password: SecretStr = Field(
         title="Teacher’s password",
         description="Teacher’s password",
@@ -38,6 +40,7 @@ class TeacherCreate(Teacher):
         min_length=6,
         max_length=32,
     )
+
     admin: bool = Field(
         title="Checkbox",
         description="Admin status",
@@ -85,7 +88,7 @@ class TeachersResponse(Teacher):
     groups: List[Optional[GroupResponse]]
 
 
-class TeacherUpdate(BaseModel):
+class TeacherUpdate(BaseModel, PasswordMixin):
     model_config = config
     teacher_id: UUID = Field(title="Teacher’s id", description="Teacher’s id")
     email: EmailStr = Field(

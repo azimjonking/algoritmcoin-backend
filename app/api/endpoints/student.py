@@ -1,10 +1,12 @@
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from ..dependencies.session import get_session
 from ...schemas.student import StudentCreate, StudentResponse, StudentUpdate
-from ...models import Student
+from ...schemas.system import Message
+from ...models import Student, Teacher
 
+from .auth import cookie
 
 student_router = APIRouter(prefix="/student")
 
@@ -15,8 +17,19 @@ student_router = APIRouter(prefix="/student")
 async def create_student(
     payload: StudentCreate,
     session: AsyncSession = Depends(get_session),
+    token: str = Depends(cookie),
 ):
-    student = Student(**payload.model_dump())
+    teacher = Teacher()
+    if not await teacher.verify_token(token):
+        raise HTTPException(
+            detail="Qaytadan kiring", status_code=status.HTTP_401_UNAUTHORIZED
+        )
+    exist_student = Student(**payload.model_dump())
+    if await exist_student.get_by(session, phone_number=payload.phone_number):
+        exist_student_data = await exist_student.get_with_groups_and_teachers(session)
+        return exist_student_data
+    else:
+        student = Student(**payload.model_dump())
     return await student.save(session)
 
 
@@ -37,7 +50,7 @@ async def update_student(
 ):
     student = Student(
         id=payload.student_id,
-        **payload.model_dump(exclude_none=True, exclude={"student_id"})
+        **payload.model_dump(exclude_none=True, exclude={"student_id"}),
     )
     return await student.update(session)
 

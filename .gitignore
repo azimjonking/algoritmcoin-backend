@@ -1,5 +1,5 @@
 .vscode
-venv
+.venv
 commands.txt
 **/__pycache__/
 .env

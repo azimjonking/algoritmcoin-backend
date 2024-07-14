@@ -8,7 +8,6 @@ from pydantic import (
     Field,
     EmailStr,
     ConfigDict,
-    SecretStr,
     StringConstraints,
     constr,
 )

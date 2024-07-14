@@ -1,7 +1,7 @@
 from os import getenv
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
-from typing import Any, Dict
+from typing import Any, Optional
 
 from jose import jwt, ExpiredSignatureError
 
@@ -21,10 +21,10 @@ class TokenMixin:
         token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")  # type: ignore
         return token
 
-    @staticmethod
-    def verify_token(token: str) -> Dict[str, Any]:
+    async def verify_token(self, token: str) -> Optional[bool]:
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])  # type: ignore
-            return payload
+            self.id = payload["sub"]
+            return True
         except ExpiredSignatureError:
             raise ValueError("Токен истек")

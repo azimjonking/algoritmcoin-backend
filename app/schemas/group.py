@@ -35,7 +35,7 @@ class Group(BaseModel):
 
 
 class GroupCreate(Group):
-    teacher_id: UUID = Field(title="Teacher’s id", description="Teacher’s id")
+    teacher_id: Optional[UUID] = Field(title="Teacher’s id", description="Teacher’s id")
 
 
 class StudenToGroup:
@@ -80,12 +80,18 @@ class Student(BaseModel):
 
 
 class GroupResponse(Group):
-    id: UUID = Field(title="Teacher’s id", description="Teacher’s id")
+    id: UUID = Field(title="Group’s id", description="Group’s id")
+
+
+class GroupsResponse(Group):
+    id: UUID = Field(title="Group’s id", description="Group’s id")
     teacher: TeacherResponse
     students: List[Optional[Student]]
 
 
 class GroupUpdate(BaseModel):
+    model_config = config
+    id: UUID = Field(title="Group’s id", description="Group’s id")
     major: Optional[str] = Field(
         title="Group’s major",
         description="Group’s major",
@@ -101,7 +107,9 @@ class GroupUpdate(BaseModel):
             "english_kids",
         ],
     )
-    teacher_id: Optional[UUID] = Field(title="Teacher’s id", description="Teacher’s id")
+    teacher_id: Optional[UUID] = Field(
+        title="Teacher’s id", description="Teacher’s id", default=None
+    )
 
 
 # class Group(Base):

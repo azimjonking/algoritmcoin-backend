@@ -1,17 +1,21 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, ByteString
 from bcrypt import hashpw, gensalt, checkpw
+from enum import Enum
+from uuid import UUID, uuid4
+from datetime import date
+from typing import Annotated, List, Optional
+
+from pydantic import SecretStr
 
 
 class PasswordMixin:
-    _password: Any
+    password_hash: Any
+    password: SecretStr
 
-    @property
-    def password(self) -> bytes:
-        return self._password
+    async def hach_password(self):
+        self.password_hash = hashpw(
+            self.password.get_secret_value().encode("utf-8"), gensalt()
+        )
 
-    @password.setter
-    def password(self, value: str) -> None:
-        self._password = hashpw(value.encode("utf-8"), gensalt())
-
-    def check_password(self, value: str) -> bool:
-        return checkpw(value.encode("utf-8"), self._password)
+    async def check_password(self, password: SecretStr) -> bool:
+        return checkpw(password.get_secret_value().encode("utf-8"), self.password_hash)

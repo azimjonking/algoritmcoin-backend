@@ -23,7 +23,8 @@ async def create_teacher(
     payload: TeacherCreate,
     session: AsyncSession = Depends(get_session),
 ):
-    teacher = Teacher(**payload.model_dump())
+    await payload.hach_password()
+    teacher = Teacher(**payload.model_dump(exclude={"password"}))
     await teacher.save(session)
     return teacher
 
@@ -44,11 +45,15 @@ async def update_teacher(
     payload: TeacherUpdate,
     session: AsyncSession = Depends(get_session),
 ):
+    if payload.password:
+        await payload.hach_password()
+
     teacher = Teacher(
         id=payload.teacher_id,
     )
     return await teacher.update(
-        session, **payload.model_dump(exclude_none=True, exclude={"teacher_id"})
+        session,
+        **payload.model_dump(exclude_none=True, exclude={"teacher_id", "password"})
     )
 
 
