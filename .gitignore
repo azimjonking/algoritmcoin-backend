@@ -1,0 +1,6 @@
+.vscode
+venv
+commands.txt
+**/__pycache__/
+.env
+/.env
